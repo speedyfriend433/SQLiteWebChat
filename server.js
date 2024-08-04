@@ -33,12 +33,18 @@ app.get('/chat-history', (req, res) => {
   });
 });
 
-const users = new Set();
+const users = new Map();
 
 io.on('connection', (socket) => {
   console.log('New user connected');
 
+  socket.on('user joined', (username) => {
+    users.set(socket.id, username);
+    io.emit('update users', Array.from(users.values()));
+  });
+
   socket.on('chat message', (msg) => {
+    // Add an ID to the message
     msg.id = Date.now().toString();
     
     db.run('INSERT INTO messages (username, message) VALUES (?, ?)', [msg.username, msg.message], (err) => {
@@ -46,16 +52,6 @@ io.on('connection', (socket) => {
         console.error('Error saving message:', err);
       } else {
         io.emit('chat message', msg);
-      }
-    });
-  });
-
-  socket.on('delete message', (messageId) => {
-    db.run('DELETE FROM messages WHERE id = ?', [messageId], (err) => {
-      if (err) {
-        console.error('Error deleting message:', err);
-      } else {
-        io.emit('message deleted', messageId);
       }
     });
   });
@@ -75,11 +71,25 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected');
+    const username = users.get(socket.id);
+    users.delete(socket.id);
+    io.emit('update users', Array.from(users.values()));
+    io.emit('user left', username);
+  });
+});
+
+  socket.on('delete message', (messageId) => {
+    db.run('DELETE FROM messages WHERE id = ?', [messageId], (err) => {
+      if (err) {
+        console.error('Error deleting message:', err);
+      } else {
+        io.emit('message deleted', messageId);
+      }
+    });
+  });
     // Remove user from online users (you'll need to track which socket belongs to which user)
     // users.delete(username);
     // io.emit('update users', Array.from(users));
-  });
-});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
