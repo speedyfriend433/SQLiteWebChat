@@ -10,6 +10,29 @@ const notificationSound = document.getElementById('notification-sound');
 const socket = io();
 
 let username = '';
+
+// Username submit
+usernameInput.addEventListener('change', (e) => {
+  username = e.target.value.trim();
+  if (username) {
+    socket.emit('user joined', username);
+  }
+});
+
+// Online users
+socket.on('update users', (users) => {
+  usersList.innerHTML = '';
+  users.forEach(user => {
+    const li = document.createElement('li');
+    li.textContent = user;
+    usersList.appendChild(li);
+  });
+});
+
+socket.on('user left', (username) => {
+  outputMessage({ username: 'System', message: `${username} has left the chat.` });
+});
+
 let typingTimeout;
 
 // Load chat history
