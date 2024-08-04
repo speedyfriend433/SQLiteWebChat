@@ -33,23 +33,51 @@ app.get('/chat-history', (req, res) => {
   });
 });
 
+const users = new Set();
+
 io.on('connection', (socket) => {
   console.log('New user connected');
 
   socket.on('chat message', (msg) => {
-    const { username, message } = msg;
-  
-    db.run('INSERT INTO messages (username, message) VALUES (?, ?)', [username, message], (err) => {
+    msg.id = Date.now().toString();
+    
+    db.run('INSERT INTO messages (username, message) VALUES (?, ?)', [msg.username, msg.message], (err) => {
       if (err) {
         console.error('Error saving message:', err);
       } else {
-        io.emit('chat message', { username, message, timestamp: new Date() });
+        io.emit('chat message', msg);
       }
     });
   });
 
+  socket.on('delete message', (messageId) => {
+    db.run('DELETE FROM messages WHERE id = ?', [messageId], (err) => {
+      if (err) {
+        console.error('Error deleting message:', err);
+      } else {
+        io.emit('message deleted', messageId);
+      }
+    });
+  });
+
+  socket.on('typing', (username) => {
+    socket.broadcast.emit('typing', username);
+  });
+
+  socket.on('stop typing', () => {
+    socket.broadcast.emit('stop typing');
+  });
+
+  socket.on('new user', (username) => {
+    users.add(username);
+    io.emit('update users', Array.from(users));
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected');
+    // Remove user from online users (you'll need to track which socket belongs to which user)
+    // users.delete(username);
+    // io.emit('update users', Array.from(users));
   });
 });
 
