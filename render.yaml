@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: sqlite-chat-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: DB_PATH
+        value: /data/chat.db
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
