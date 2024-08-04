@@ -32,9 +32,26 @@ socket.on('chat message', (msg) => {
 function outputMessage(msg) {
   const div = document.createElement('div');
   div.classList.add('message');
+  
+  if (msg.username === usernameInput.value) {
+    div.classList.add('sent');
+  } else {
+    div.classList.add('received');
+  }
+
   div.innerHTML = `
     <p class="meta">${msg.username} <span>${new Date(msg.timestamp).toLocaleString()}</span></p>
     <p class="text">${msg.message}</p>
   `;
   chatMessages.appendChild(div);
+
+  setTimeout(() => div.classList.add('show'), 100);
 }
+
+usernameInput.addEventListener('focus', () => {
+  usernameInput.style.transform = 'translateY(-5px)';
+});
+
+usernameInput.addEventListener('blur', () => {
+  usernameInput.style.transform = 'translateY(0)';
+});
