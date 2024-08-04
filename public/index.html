@@ -3,27 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Chat App</title>
+    <title>Advanced Chat</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-mart@latest/css/emoji-mart.css" />
 </head>
 <body>
     <div class="chat-container">
         <header class="chat-header">
-            <h1>Modern Chat App</h1>
+            <h1>Advanced Chat App</h1>
         </header>
+        <div class="online-users">
+            <h3>Online Users</h3>
+            <ul id="users-list"></ul>
+        </div>
         <main class="chat-main">
             <div class="chat-messages"></div>
+            <div id="typing"></div>
         </main>
         <div class="chat-form-container">
             <form id="chat-form">
                 <input id="username" type="text" placeholder="Your username" required>
                 <input id="msg" type="text" placeholder="Type a message..." required autocomplete="off">
-                <button class="btn">Send</button>
+                <button type="button" id="emoji-btn">😊</button>
+                <button class="btn" type="submit">Send</button>
             </form>
         </div>
     </div>
+    <audio id="notification-sound" src="notification.mp3"></audio>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
